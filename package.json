@@ -6,17 +6,20 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "start": "webpack-dev-server --open",
+    "start": "node server",
     "server": "nodemon server",
+    "client": "webpack-dev-server --open",
     "build": "webpack --mode=\"production\"",
     "build:watch": "webpack --watch",
     "lint": "eslint src tests",
     "format:src": "prettier-eslint --write --single-quote --semi \"$PWD/src/**/*.js\"",
-    "format:tests": "prettier-eslint --write --single-quote --semi \"$PWD/tests/**/*.js\""
+    "format:tests": "prettier-eslint --write --single-quote --semi \"$PWD/tests/**/*.js\"",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "express": "^4.17.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
