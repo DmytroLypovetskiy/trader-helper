@@ -17,4 +17,4 @@ class App extends Component {
   }
 }
 
-ReactDOM.render(<App />, document.querySelector('#app')); KBK18Z7hlg6nVhBY
+ReactDOM.render(<App />, document.querySelector('#app'));

@@ -164,7 +164,6 @@ var App = /*#__PURE__*/function (_Component) {
 }(react__WEBPACK_IMPORTED_MODULE_7__["Component"]);
 
 react_dom__WEBPACK_IMPORTED_MODULE_8___default.a.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7___default.a.createElement(App, null), document.querySelector('#app'));
-KBK18Z7hlg6nVhBY;
 
 /***/ }),
 

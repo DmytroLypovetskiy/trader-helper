@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const ProfileSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: user
+    ref: 'user'
+  },
+  date: {
+    type: Date,
+    default: Date.now
   },
   stocks: [{
     symbol: {
@@ -14,23 +18,24 @@ const ProfileSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    bougthFor: {
-      type: Number,
+    date: {
+      type: Date,
+      required: true
     },
-    soldFor: {
+    boughtFor: {
       type: Number,
-      required: true,
+      required: true
     }
   }],
   watchlist: [{
     symbol: {
       type: String,
-      required: true,
+      required: true
     },
     title: {
       type: String,
       required: true,
-    }
+    },
   }]
 });
 

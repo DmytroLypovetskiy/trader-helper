@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const request = require('request');
-const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -12,88 +11,135 @@ const {
 } = require('express-validator');
 const auth = require('../../middleware/auth');
 
+const Profile = require('../../models/Profile');
 const User = require('../../models/User');
 
-// @route   POST api/user
-// @desc    Register user
-// @access  Public
+// @route   GET api/profile
+// @desc    Get current user profile
+// @access  Private
+router.get('/', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({
+      user: req.user.id
+    });
+
+    if (!profile) {
+      return res.status(400).json({
+        msg: 'There is no profile for this user'
+      });
+    }
+
+    res.json(profile.populate('user', ['name', 'logo']));
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   POST api/profile
+// @desc    Create or update user profile
+// @access  Private
 router.post(
   '/',
-  [
-    check('name', 'User name is required').not().isEmpty(),
-    check('email', 'Include a valid email').isEmail(),
-    check('password', 'Enter a password with 6 or more characters').isLength({
-      min: 6
-    })
-  ],
+  auth,
   async (req, res) => {
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
       return res.status(400).json({
         errors: errors.array()
       });
     }
 
-    const {
-      name,
-      email,
-      password
-    } = req.body;
+    // Build profile object
+    const profileFields = {
+      user: req.user.id
+    };
 
     try {
-      let user = await User.findOne({
-        email
+      let profile = await Profile.findOne({
+        user: req.user.id
       });
 
-      if (user) {
+      if (profile) {
+        // Update
+        profile = await Profile.findOneAndUpdate({
+          user: req.user.id
+        }, {
+          $set: profileFields
+        }, {
+          new: true
+        });
+
+        return res.json(profile);
+      }
+
+      //Create
+      profile = new Profile(profileFields);
+
+      await profile.save();
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
+// @route   PUT api/profile/stocks
+// @desc    Add profile stocks
+// @access  Private
+router.put(
+  '/stocks',
+  auth,
+  [
+    check('symbol', 'Symbol is required')
+    .not()
+    .isEmpty(),
+    check('title', 'Title is required')
+    .not()
+    .isEmpty(),
+    check('date', 'Date is required')
+    .not()
+    .isEmpty(),
+    check('boughtFor', 'Bought date is required')
+    .not()
+    .isEmpty()
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
         return res.status(400).json({
-          errors: [{
-            msg: 'User already exists'
-          }]
+          errors: errors.array()
         });
       }
 
-      const logo = gravatar.url(email, {
-        s: '200',
-        r: 'pg',
-        d: 'mm'
-      });
+      const {
+        symbol,
+        title,
+        date,
+        boughtFor
+      } = req.body;
 
-      user = new User({
-        name,
-        email,
-        logo,
-        password
-      });
-
-      const salt = await bcrypt.genSalt(10);
-
-      user.password = await bcrypt.hash(password, salt);
-
-      await user.save();
-
-      const payload = {
-        user: {
-          id: user.id
-        }
+      const newExp = {
+        symbol,
+        title,
+        date,
+        boughtFor
       };
 
-      jwt.sign(
-        payload,
-        config.get('jwtSecret'), {
-          expiresIn: 360000
-        },
-        (err, token) => {
-          if (err) throw err;
-          res.json({
-            token
-          });
-        }
-      );
+      const profile = await Profile.findOne({
+        user: req.user.id
+      });
+
+      profile.stocks.unshift(newExp);
+
+      await profile.save();
+
+      res.json(profile);
     } catch (err) {
       console.error(err.message);
-      res.status(500).send('Server error');
+      res.status(500).send('Server Error');
     }
   }
 );
