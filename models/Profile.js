@@ -5,10 +5,6 @@ const ProfileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user'
   },
-  date: {
-    type: Date,
-    default: Date.now
-  },
   stocks: [{
     symbol: {
       type: String,

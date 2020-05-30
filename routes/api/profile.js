@@ -36,55 +36,6 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// @route   POST api/profile
-// @desc    Create or update user profile
-// @access  Private
-router.post(
-  '/',
-  auth,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array()
-      });
-    }
-
-    // Build profile object
-    const profileFields = {
-      user: req.user.id
-    };
-
-    try {
-      let profile = await Profile.findOne({
-        user: req.user.id
-      });
-
-      if (profile) {
-        // Update
-        profile = await Profile.findOneAndUpdate({
-          user: req.user.id
-        }, {
-          $set: profileFields
-        }, {
-          new: true
-        });
-
-        return res.json(profile);
-      }
-
-      //Create
-      profile = new Profile(profileFields);
-
-      await profile.save();
-      res.json(profile);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
-);
-
 // @route   PUT api/profile/stocks
 // @desc    Add profile stocks
 // @access  Private
@@ -108,6 +59,7 @@ router.put(
   async (req, res) => {
     try {
       const errors = validationResult(req);
+
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array()
@@ -143,5 +95,105 @@ router.put(
     }
   }
 );
+
+// @route   DELETE api/profile/stocks/:stocks_id
+// @desc    Delete stock from profile
+// @access  Private
+router.delete('/stocks/:stocks_id', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({
+      user: req.user.id
+    });
+
+    // Get remove index
+    const removeIndex = profile.stocks
+      .map((item) => item.id)
+      .indexOf(req.params.stocks_id);
+
+    profile.stocks.splice(removeIndex, 1);
+
+    await profile.save();
+
+    res.json(profile);
+  } catch (error) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   PUT api/profile/watchlist
+// @desc    Add stock to watchlist
+// @access  Private
+router.put(
+  '/watchlist',
+  auth,
+  [
+    check('symbol', 'Symbol is required')
+    .not()
+    .isEmpty(),
+    check('title', 'Title is required')
+    .not()
+    .isEmpty()
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array()
+        });
+      }
+
+      const {
+        symbol,
+        title
+      } = req.body;
+
+      const newExp = {
+        symbol,
+        title
+      };
+
+      const profile = await Profile.findOne({
+        user: req.user.id
+      });
+
+      profile.watchlist.unshift(newExp);
+
+      await profile.save();
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
+// @route   DELETE api/profile/watchlist/:stocks_id
+// @desc    Delete stock from watchlist
+// @access  Private
+router.delete('/watchlist/:stocks_id', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({
+      user: req.user.id
+    });
+
+    // Get remove index
+    const removeIndex = profile.watchlist
+      .map((item) => item.id)
+      .indexOf(req.params.stocks_id);
+
+    profile.watchlist.splice(removeIndex, 1);
+
+    await profile.save();
+
+    res.json(profile);
+  } catch (error) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 module.exports = router;

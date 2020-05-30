@@ -13,8 +13,9 @@ const {
 const auth = require('../../middleware/auth');
 
 const User = require('../../models/User');
+const Profile = require('../../models/Profile');
 
-// @route   POST api/user
+// @route   POST api/users
 // @desc    Register user
 // @access  Public
 router.post(
@@ -72,6 +73,12 @@ router.post(
       user.password = await bcrypt.hash(password, salt);
 
       await user.save();
+
+      const profile = new Profile({
+        user: user.id
+      });
+
+      await profile.save();
 
       const payload = {
         user: {
