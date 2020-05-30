@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb+srv://dmytroly:HdNeXbEw2z7JdbBd@traderhelper-orf6a.mongodb.net/test?retryWrites=true&w=majority",
+  "jwtSecret": "mysecrettoken"
+}

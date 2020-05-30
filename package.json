@@ -14,12 +14,19 @@
     "lint": "eslint src tests",
     "format:src": "prettier-eslint --write --single-quote --semi \"$PWD/src/**/*.js\"",
     "format:tests": "prettier-eslint --write --single-quote --semi \"$PWD/tests/**/*.js\"",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run build:watch\""
   },
   "dependencies": {
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "express": "^4.17.1"
+    "config": "^3.3.1",
+    "express": "^4.17.1",
+    "express-validator": "^6.4.0",
+    "request": "^2.88.2",
+    "mongoose": "^5.9.9",
+    "gravatar": "^1.8.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
