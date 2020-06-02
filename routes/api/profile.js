@@ -32,69 +32,9 @@ router.get('/', auth, async (req, res) => {
     res.json(profile.populate('user', ['name', 'logo']));
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send('Server Error111');
   }
 });
-
-// @route   PUT api/profile/stocks
-// @desc    Add profile stocks
-// @access  Private
-router.put(
-  '/stocks',
-  auth,
-  [
-    check('symbol', 'Symbol is required')
-    .not()
-    .isEmpty(),
-    check('title', 'Title is required')
-    .not()
-    .isEmpty(),
-    check('date', 'Date is required')
-    .not()
-    .isEmpty(),
-    check('boughtFor', 'Bought date is required')
-    .not()
-    .isEmpty()
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          errors: errors.array()
-        });
-      }
-
-      const {
-        symbol,
-        title,
-        date,
-        boughtFor
-      } = req.body;
-
-      const newExp = {
-        symbol,
-        title,
-        date,
-        boughtFor
-      };
-
-      const profile = await Profile.findOne({
-        user: req.user.id
-      });
-
-      profile.stocks.unshift(newExp);
-
-      await profile.save();
-
-      res.json(profile);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
-);
 
 // @route   DELETE api/profile/stocks/:stocks_id
 // @desc    Delete stock from profile
@@ -121,6 +61,8 @@ router.delete('/stocks/:stocks_id', auth, async (req, res) => {
   }
 });
 
+
+
 // @route   PUT api/profile/watchlist
 // @desc    Add stock to watchlist
 // @access  Private
@@ -129,11 +71,8 @@ router.put(
   auth,
   [
     check('symbol', 'Symbol is required')
-    .not()
-    .isEmpty(),
-    check('title', 'Title is required')
-    .not()
-    .isEmpty()
+      .not()
+      .isEmpty()
   ],
   async (req, res) => {
     try {
@@ -146,18 +85,20 @@ router.put(
       }
 
       const {
-        symbol,
-        title
+        symbol
       } = req.body;
 
       const newExp = {
-        symbol,
-        title
+        symbol
       };
+
+      console.log(newExp);
 
       const profile = await Profile.findOne({
         user: req.user.id
       });
+
+      console.log(profile.watchlist);
 
       profile.watchlist.unshift(newExp);
 

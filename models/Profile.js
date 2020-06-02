@@ -7,31 +7,17 @@ const ProfileSchema = new mongoose.Schema({
   },
   stocks: [{
     symbol: {
-      type: String,
-      required: true,
+      type: String
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    date: {
-      type: Date,
-      required: true
-    },
-    boughtFor: {
-      type: Number,
-      required: true
+    qty: {
+      type: Number
     }
   }],
   watchlist: [{
     symbol: {
       type: String,
       required: true
-    },
-    title: {
-      type: String,
-      required: true,
-    },
+    }
   }]
 });
 

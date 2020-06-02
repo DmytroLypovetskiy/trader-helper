@@ -15,9 +15,10 @@ app.use(express.json({
 }));
 app.use(cors());
 
-app.use("/api/auth", require("./routes/api/auth"));
-app.use("/api/users", require("./routes/api/users"));
-app.use("/api/profile", require("./routes/api/profile"));
+app.use("/api/auth", require("./routes/api/auth")); // User autorization
+app.use("/api/user", require("./routes/api/user")); // User validation
+app.use("/api/profile", require("./routes/api/profile")); // User profile
+app.use("/api/transactions", require("./routes/api/transactions")); // User transactions
 
 
 app.get("/", (req, res) => {
