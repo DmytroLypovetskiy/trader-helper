@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 const API = "http://localhost:5000";
 import setAuthToken from './../utils/setAuthToken';
 
-class Login extends React.Component {
+class Login extends Component {
   state = {
     email: '',
     password: '',
