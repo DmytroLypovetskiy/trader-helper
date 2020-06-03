@@ -21,10 +21,40 @@ router.get(
   '/',
   auth,
   async (req, res) => {
-    console.log(req.user.id);
     try {
       const transactions = await Transaction.find({
         user: req.user.id
+      }).sort({
+        date: -1
+      });
+
+      res.json(transactions);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
+// @route   GET api/transactions/buy/:symbol
+// @desc    Get user transactions for particular stock
+// @access  Private
+router.get(
+  '/buy/:symbol',
+  auth,
+  async (req, res) => {
+    try {
+      const transactions = await Transaction.find({
+        $and: [{
+            user: req.user.id
+          },
+          {
+            symbol: req.params.symbol
+          },
+          {
+            type: 'buy'
+          }
+        ]
       }).sort({
         date: -1
       });
