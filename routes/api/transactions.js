@@ -37,7 +37,7 @@ router.get(
 );
 
 // @route   GET api/transactions/buy/:symbol
-// @desc    Get user transactions for particular stock
+// @desc    Get user BUY transactions by symbol
 // @access  Private
 router.get(
   '/buy/:symbol',
@@ -53,6 +53,37 @@ router.get(
           },
           {
             type: 'buy'
+          }
+        ]
+      }).sort({
+        date: -1
+      });
+
+      res.json(transactions);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
+// @route   GET api/transactions/sell/:symbol
+// @desc    Get user SELL transactions by symbol
+// @access  Private
+router.get(
+  '/sell/:symbol',
+  auth,
+  async (req, res) => {
+    try {
+      const transactions = await Transaction.find({
+        $and: [{
+            user: req.user.id
+          },
+          {
+            symbol: req.params.symbol
+          },
+          {
+            type: 'sell'
           }
         ]
       }).sort({
