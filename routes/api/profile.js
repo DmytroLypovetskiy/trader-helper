@@ -32,7 +32,7 @@ router.get('/', auth, async (req, res) => {
     res.json(profile.populate('user', ['name', 'logo']));
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error111');
+    res.status(500).send('Server Error');
   }
 });
 
@@ -71,8 +71,8 @@ router.put(
   auth,
   [
     check('symbol', 'Symbol is required')
-      .not()
-      .isEmpty()
+    .not()
+    .isEmpty()
   ],
   async (req, res) => {
     try {

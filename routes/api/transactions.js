@@ -98,6 +98,24 @@ router.get(
   }
 );
 
+// @route   GET api/transactions/:id
+// @desc    Get user transaction by id
+// @access  Private
+router.get(
+  '/:id',
+  auth,
+  async (req, res) => {
+    try {
+      const transaction = await Transaction.findById(req.params.id);
+
+      res.json(transaction);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
 // @route   POST api/transactions/buy
 // @desc    Add transaction Buy
 // @access  Private
@@ -147,16 +165,12 @@ router.post(
       const profile = await Profile.findOne({
         user: req.user.id
       });
-      const isOwned = profile.stocks.find(stock => stock.symbol === symbol);
 
-      if (isOwned) {
-        isOwned.qty += qty;
-      } else {
-        profile.stocks.push({
-          symbol,
-          qty
-        })
-      }
+      profile.stocks.push({
+        buy: transaction._id
+      })
+
+      console.log(transaction);
 
       await transaction.save();
       await profile.save();
@@ -222,7 +236,7 @@ router.post(
 
       if (isOwned) {
         if (isOwned.qty >= qty) {
-          isOwned.qty -= qty;
+          isOwned.qty -= +qty;
         } else {
           return res.status(400).send('Not enought stocks to sell');
         }

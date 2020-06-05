@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 
 import './styles.scss';
-import { Login, Dashboard } from './components';
+import { Login, Register, Dashboard } from './components';
 import setAuthToken from './utils/setAuthToken';
 
 if (localStorage.token) {
@@ -17,6 +17,7 @@ class App extends Component {
         <section className="container-fluid p-3 mb-3">
           <Switch>
             <Route exact path='/' component={Login} />
+            <Route exact path='/register' component={Register} />
             <Route path='/dashboard' component={Dashboard} />
           </Switch>
         </section>

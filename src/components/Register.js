@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 const API = "http://localhost:5000";
-import setAuthToken from './../utils/setAuthToken';
+import setAuthToken from '../utils/setAuthToken';
 
-class Login extends Component {
+class Register extends Component {
   state = {
+    name: '',
     email: '',
     password: '',
     isAuthenticated: !!localStorage.getItem('token')
@@ -13,11 +14,11 @@ class Login extends Component {
   setFieldToState = (e) => {
     this.setState({ [e.target.name]: e.target.value })
   }
-  loginUser = async (e) => {
+  registerUser = async (e) => {
     e.preventDefault();
 
-    const { email, password } = this.state;
-    const { data } = await axios.post(`${API}/api/auth`, { email, password });
+    const { name, email, password } = this.state;
+    const { data } = await axios.post(`${API}/api/user`, { name, email, password });
 
     if (data) {
       localStorage.setItem('token', data.token);
@@ -26,7 +27,7 @@ class Login extends Component {
 
   }
   render() {
-    const { email, password, isAuthenticated } = this.state;
+    const { name, email, password, isAuthenticated } = this.state;
     // Redirect if logged in
 
     if (isAuthenticated) {
@@ -35,8 +36,15 @@ class Login extends Component {
 
     return (
       <div className="card p-5 col-md-6 m-auto">
-        <form onSubmit={this.loginUser}>
-          <h1>Login User</h1>
+        <form onSubmit={this.registerUser}>
+          <h1>Register User</h1>
+          <div className="form-group">
+            <label htmlFor="name">Name</label>
+            <input type="name" className="form-control rounded-pill" name="name"
+              value={name}
+              onChange={(e) => this.setFieldToState(e)}
+              placeholder="Name" required />
+          </div>
           <div className="form-group">
             <label htmlFor="email">Email address</label>
             <input type="email" className="form-control rounded-pill" name="email"
@@ -52,8 +60,8 @@ class Login extends Component {
               id="inputPassword" required />
           </div>
           <div className="d-flex justify-content-between align-items-center">
-            <button type="submit" className="btn btn-primary rounded-pill">Login</button>
-            <div>Don't have an account? <Link to="/register">Register</Link></div>
+            <button type="submit" className="btn btn-primary rounded-pill">Register</button>
+            <div>Already have an acccount? Back to <Link to="/">Login</Link></div>
           </div>
         </form>
       </div>
@@ -61,4 +69,4 @@ class Login extends Component {
   }
 }
 
-export default Login;
+export default Register;

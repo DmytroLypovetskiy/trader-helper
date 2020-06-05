@@ -6,12 +6,14 @@ const ProfileSchema = new mongoose.Schema({
     ref: 'user'
   },
   stocks: [{
-    symbol: {
-      type: String
+    buy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'transactions'
     },
-    qty: {
-      type: Number
-    }
+    sell: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'transactions'
+    }]
   }],
   watchlist: [{
     symbol: {

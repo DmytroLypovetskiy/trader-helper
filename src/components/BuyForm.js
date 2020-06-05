@@ -1,36 +1,55 @@
 import React, { Component } from 'react';
-import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 const API = "http://localhost:5000";
-import setAuthToken from '../utils/setAuthToken';
 
 class BuyForm extends Component {
   state = {
+    stocks: [],
     symbol: '',
-    qty: 0,
+    qty: '',
     date: '',
-    price: 0
+    price: ''
+  }
+  /*
+  componentDidMount() {
+    const { stocks } = this.props;
+
+    this.setState({ stocks });
   }
 
+  componentDidUpdate(prev) {
+    if (prev.stocks.length !== this.props.stocks.length) {
+      const { stocks } = this.props;
+
+      this.setState({ stocks });
+    }
+  }
+  */
   buyStock = async (e) => {
     e.preventDefault();
 
-    const transaction = await axios.post(`${API}/api/transactions/buy`, { ...this.state });
+    try {
+      const transaction = await axios.post(`${API}/api/transactions/buy`, { ...this.state });
+      const { updateStocks } = this.props;
+      const { symbol, qty } = this.state;
 
-    if (transaction) {
-      this.setState({
-        symbol: '',
-        qty: 0,
-        date: '',
-        price: 0
-      })
+      updateStocks(symbol, qty);
+
+      if (transaction) {
+        this.setState({
+          symbol: '',
+          qty: '',
+          date: '',
+          price: ''
+        });
+      }
+    } catch (err) {
+      console.error(err)
     }
   }
-
   setFieldToState = (e) => {
     this.setState({ [e.target.name]: e.target.value })
   }
-
   render() {
     const { symbol, qty, date, price } = this.state;
 
