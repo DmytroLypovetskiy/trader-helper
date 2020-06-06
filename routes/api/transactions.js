@@ -36,68 +36,6 @@ router.get(
   }
 );
 
-// @route   GET api/transactions/buy/:symbol
-// @desc    Get user BUY transactions by symbol
-// @access  Private
-router.get(
-  '/buy/:symbol',
-  auth,
-  async (req, res) => {
-    try {
-      const transactions = await Transaction.find({
-        $and: [{
-            user: req.user.id
-          },
-          {
-            symbol: req.params.symbol
-          },
-          {
-            type: 'buy'
-          }
-        ]
-      }).sort({
-        date: -1
-      });
-
-      res.json(transactions);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
-);
-
-// @route   GET api/transactions/sell/:symbol
-// @desc    Get user SELL transactions by symbol
-// @access  Private
-router.get(
-  '/sell/:symbol',
-  auth,
-  async (req, res) => {
-    try {
-      const transactions = await Transaction.find({
-        $and: [{
-            user: req.user.id
-          },
-          {
-            symbol: req.params.symbol
-          },
-          {
-            type: 'sell'
-          }
-        ]
-      }).sort({
-        date: -1
-      });
-
-      res.json(transactions);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
-);
-
 // @route   GET api/transactions/:id
 // @desc    Get user transaction by id
 // @access  Private
@@ -162,6 +100,8 @@ router.post(
         type: 'buy'
       });
 
+      console.log(transaction, 'transaction buy');
+
       const profile = await Profile.findOne({
         user: req.user.id
       });
@@ -169,8 +109,6 @@ router.post(
       profile.stocks.push({
         buy: transaction._id
       })
-
-      console.log(transaction);
 
       await transaction.save();
       await profile.save();
@@ -183,11 +121,11 @@ router.post(
   }
 );
 
-// @route   POST api/transactions/sell
-// @desc    Add transaction Sell
+// @route   POST api/transactions/sell/:id
+// @desc    Add transaction Sell by id
 // @access  Private
 router.post(
-  '/sell',
+  '/sell/:id',
   auth,
   [
     check('symbol', 'Symbol is required')
@@ -211,6 +149,14 @@ router.post(
         return res.status(400).json({
           errors: errors.array()
         });
+      };
+
+      // Check user
+      const origTransaction = await Transaction.findById(req.params.id);
+      if (origTransaction.user.toString() !== req.user.id) {
+        return res.status(401).json({
+          msg: 'User not authorized'
+        });
       }
 
       const user = await User.findById(req.user.id).select('-password');
@@ -226,24 +172,17 @@ router.post(
         qty,
         date,
         price,
-        type: 'sell'
+        type: 'sell',
+        transactionRef: [origTransaction._id]
       });
+
+      origTransaction.transactionRef.push(transaction._id);
 
       const profile = await Profile.findOne({
         user: req.user.id
       });
-      const isOwned = profile.stocks.find(stock => stock.symbol === symbol);
 
-      if (isOwned) {
-        if (isOwned.qty >= qty) {
-          isOwned.qty -= +qty;
-        } else {
-          return res.status(400).send('Not enought stocks to sell');
-        }
-      } else {
-        return res.status(400).send(`No ${symbol} stocks to sell`);
-      }
-
+      await origTransaction.save();
       await transaction.save();
       await profile.save();
 

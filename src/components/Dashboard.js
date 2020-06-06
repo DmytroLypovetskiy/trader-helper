@@ -58,11 +58,13 @@ export default class Dashboard extends Component {
             <div className="card p-3 mb-3">
               <h2 className="h5">My Stocks</h2>
               <BuyForm stocks={stocks} updateStocks={this.updateStocks} />
+              <h3>GA</h3>
               {stocks &&
                 <ul className="list-unstyled pt-3 stocks-list">
-                  {stocks.map(stock => {
-                    return <StockInfo key={stock._id} stock={stock} />
-                  })}
+                  <div>1 items / 150 USD 20-12-2020 <button>Sell</button></div>
+                  <div>2 items / 200 USD 20-12-2020 <button>Sell</button></div>
+                  <div>20 items / 250 USD 20-12-2020 <button>Sell</button></div>
+                  {stocks.map(stock => <StockInfo key={stock._id} stock={stock} />)}
                 </ul>
               }
             </div>

@@ -24,7 +24,11 @@ const TransactionsSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true
-  }
+  },
+  transactionRef: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'transactions'
+  }]
 });
 
 module.exports = mongoose.model('transactions', TransactionsSchema);

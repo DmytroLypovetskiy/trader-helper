@@ -10,21 +10,6 @@ class BuyForm extends Component {
     date: '',
     price: ''
   }
-  /*
-  componentDidMount() {
-    const { stocks } = this.props;
-
-    this.setState({ stocks });
-  }
-
-  componentDidUpdate(prev) {
-    if (prev.stocks.length !== this.props.stocks.length) {
-      const { stocks } = this.props;
-
-      this.setState({ stocks });
-    }
-  }
-  */
   buyStock = async (e) => {
     e.preventDefault();
 
