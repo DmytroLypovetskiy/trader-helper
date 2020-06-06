@@ -55,7 +55,7 @@ class BuyForm extends Component {
 
     return (
       <form onSubmit={this.buyStock}>
-        <div className="input-group my-3">
+        <div className="input-group my-3 shadow-sm">
           <input type="text" className="form-control" name="symbol" placeholder="Symbol"
             value={symbol}
             onChange={this.setFieldToState}
@@ -77,6 +77,7 @@ class BuyForm extends Component {
             <button className="btn btn-primary" type="submit" id="button-stock-buy">Add</button>
           </div>
         </div>
+        cwve
       </form>
     )
   }

@@ -3,6 +3,7 @@ $theme-colors: ('primary': #5867dd);
 @import 'bootstrap/scss/bootstrap.scss';
 
 body {
+  background-color: #f5f5f9;
   padding: 1rem;
 }
 
@@ -16,4 +17,8 @@ body {
   p {
     margin-bottom: 0;
   }
+}
+
+.shadow-sm {
+  box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.075) !important;
 }

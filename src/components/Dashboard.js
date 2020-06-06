@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 
 export default class Dashboard extends Component {
   state = {
+    name: '',
     stocks: [],
     watchlist: [],
     news: []
@@ -14,31 +15,43 @@ export default class Dashboard extends Component {
   async componentDidMount() {
     const { data: { stocks, watchlist } } = await axios.get(`${API}/api/profile`);
 
+    const { data: { name } } = await axios.get(`${API}/api/auth`);
+
+    console.log(name);
+
     //delete axios.defaults.headers.common['x-auth-token'];
     const promise = axios.create({});
     promise.defaults.headers.common = {};
     promise.defaults.headers.common.accept = 'application/json';
 
-    const { data } = (await promise.get(`${finAPI}/quote?symbol=AAPL&token=br8k8g7rh5ral083hgd0`));
+    //const { data } = (await promise.get(`${finAPI}/quote?symbol=AAPL&token=br8k8g7rh5ral083hgd0`));
 
-    this.setState({ stocks, watchlist })
+    this.setState({ name, stocks, watchlist })
   }
   updateStocks = (symbol, qty) => {
+    /*
     console.log(this.state.stocks[0]);
 
     this.setState({ stocks: [this.state.stocks[0]] })
+    */
   }
   logout = () => {
     localStorage.removeItem('token');
+    this.setState({ name: '' })
   }
   render() {
-    const { stocks, watchlist } = this.state;
+    const { name, stocks, watchlist } = this.state;
+
+    console.log(stocks);
 
     return (
       <>
         <div className="d-flex justify-content-between">
-          <h1 className="h4">Dashboard</h1>
-          <div><Link to="/" className="btn btn-outline-primary btn-sm" onClick={this.logout}>Logout</Link></div>
+          <div className="d-flex align-items-center">
+            <h1 className="h4">Dashboard</h1>
+            <div className="text-muted mx-2">/ <i className="fas fa-user"></i> Hello <strong>{name}!</strong></div>
+          </div>
+          <div><Link to="/" className="btn btn-outline-primary btn rounded-circle px-2" onClick={this.logout}><i className="fas fa-door-open"></i></Link></div>
         </div>
         <div className="row pt-3">
           <div className="col-lg-9 col-md-6">
