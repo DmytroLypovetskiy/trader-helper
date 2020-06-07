@@ -4,7 +4,6 @@ const API = "http://localhost:5000";
 
 class BuyForm extends Component {
   state = {
-    stocks: [],
     symbol: '',
     qty: '',
     date: '',
@@ -37,6 +36,7 @@ class BuyForm extends Component {
   }
   render() {
     const { symbol, qty, date, price } = this.state;
+    //console.log(this.state);
 
     return (
       <form onSubmit={this.buyStock}>
@@ -62,7 +62,6 @@ class BuyForm extends Component {
             <button className="btn btn-primary" type="submit" id="button-stock-buy">Add</button>
           </div>
         </div>
-        cwve
       </form>
     )
   }
