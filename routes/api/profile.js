@@ -87,18 +87,13 @@ router.put(
       const {
         symbol
       } = req.body;
-
       const newExp = {
         symbol
       };
 
-      console.log(newExp);
-
       const profile = await Profile.findOne({
         user: req.user.id
       });
-
-      console.log(profile.watchlist);
 
       profile.watchlist.unshift(newExp);
 

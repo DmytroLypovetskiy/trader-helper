@@ -100,15 +100,34 @@ router.post(
         type: 'buy'
       });
 
-      const profile = await Profile.findOne({
+      const transactionProps = {
+        qty,
+        price,
+        transactionId: transaction._id
+      }
+      let profile = await Profile.findOne({
         user: req.user.id
       });
 
-      profile.stocks.push({
-        symbol,
-        qty,
-        transactionId: transaction._id
-      })
+      if (profile.stocks[symbol]) {
+        profile = await Profile.findOneAndUpdate({
+          user: req.user.id
+        }, {
+          $push: {
+            [`stocks.${symbol}`]: transactionProps
+          }
+        });
+      } else {
+        profile = await Profile.findOneAndUpdate({
+          user: req.user.id
+        }, {
+          $set: {
+            [`stocks.${symbol}`]: [transactionProps]
+          }
+        }, {
+          new: true
+        });
+      }
 
       await transaction.save();
       await profile.save();
