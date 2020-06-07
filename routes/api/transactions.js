@@ -100,14 +100,14 @@ router.post(
         type: 'buy'
       });
 
-      console.log(transaction, 'transaction buy');
-
       const profile = await Profile.findOne({
         user: req.user.id
       });
 
       profile.stocks.push({
-        buy: transaction._id
+        symbol,
+        qty,
+        transactionId: transaction._id
       })
 
       await transaction.save();

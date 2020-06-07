@@ -14,12 +14,12 @@ class StockInfo extends Component {
   async componentDidMount() {
     const { stock } = this.props;
     //const purchases = (await axios.get(`${API}/api/transactions/buy/${symbol}`)).data;
-    const transaction = (await axios.get(`${API}/api/transactions/${stock.buy}`)).data;
+    //const transaction = (await axios.get(`${API}/api/transactions/${stock.buy}`)).data;
 
     //this.setState({ symbol, qty, purchases });
 
     //console.log(stock);
-    console.log(transaction);
+    //console.log(transaction);
   }
 
 
