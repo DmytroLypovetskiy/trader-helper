@@ -13,19 +13,24 @@ class BuyForm extends Component {
     e.preventDefault();
 
     try {
-      const transaction = await axios.post(`${API}/api/transactions/buy`, { ...this.state });
-      const { updateStocks } = this.props;
-      const { symbol, qty } = this.state;
-
-      updateStocks(symbol, qty);
+      const { symbol, qty, date, price } = this.state;
+      const transaction = await axios.post(`${API}/api/transactions/buy`, { symbol, qty: Number(qty), date, price: Number(price) });
 
       if (transaction) {
+        const { addTransaction } = this.props;
+        const transactionData = {
+          symbol,
+          transaction: { qty, price, transactionId: transaction.data._id }
+        }
+
         this.setState({
           symbol: '',
           qty: '',
           date: '',
           price: ''
         });
+
+        addTransaction(transactionData);
       }
     } catch (err) {
       console.error(err)

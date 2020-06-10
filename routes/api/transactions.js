@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const ObjectId = require('mongodb').ObjectID;
 
 const {
   check,
@@ -75,39 +76,57 @@ router.post(
     .isEmpty()
   ],
   async (req, res) => {
-    try {
-      const errors = validationResult(req);
+    const errors = validationResult(req);
 
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          errors: errors.array()
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array()
+      });
+    }
+
+    const {
+      symbol,
+      qty,
+      date,
+      price
+    } = req.body;
+
+    const newTransaction = {
+      user: req.user.id,
+      symbol,
+      qty,
+      date,
+      price,
+      type: 'buy'
+    }
+
+    try {
+      // Create transaction
+      const transaction = new Transaction(newTransaction);
+
+      await transaction.save();
+
+      // Added transaction to user profile to keep track active stock qty
+      let profile = await Profile.findOne({
+        user: req.user.id
+      });
+
+      if (!profile) {
+        return res.status(404).json({
+          msg: 'profile not found'
         });
       }
-
-      const user = await User.findById(req.user.id).select('-password');
-      const {
-        symbol,
-        qty,
-        date,
-        price
-      } = req.body;
-      const transaction = new Transaction({
-        user: user._id,
-        symbol,
-        qty,
-        date,
-        price,
-        type: 'buy'
-      });
 
       const transactionProps = {
         qty,
         price,
-        transactionId: transaction._id
+        purchaseId: transaction._id,
+        sellIds: []
       }
-      let profile = await Profile.findOne({
-        user: req.user.id
-      });
+
+      if (!profile.stocks) {
+        profile.stocks = {};
+      }
 
       if (profile.stocks[symbol]) {
         profile = await Profile.findOneAndUpdate({
@@ -129,10 +148,10 @@ router.post(
         });
       }
 
-      await transaction.save();
       await profile.save();
 
       res.json(transaction);
+
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
@@ -156,53 +175,77 @@ router.post(
     check('date', 'Date is required')
     .not()
     .isEmpty(),
-    check('price', 'Date is required')
+    check('price', 'Price is required')
     .not()
     .isEmpty()
   ],
   async (req, res) => {
-    try {
-      const errors = validationResult(req);
+    const errors = validationResult(req);
 
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          errors: errors.array()
-        });
-      };
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array()
+      });
+    };
+
+    const {
+      symbol,
+      qty,
+      date,
+      price
+    } = req.body;
+
+    const newTransaction = {
+      user: req.user.id,
+      symbol,
+      qty,
+      date,
+      price,
+      type: 'sell'
+    }
+
+    try {
+      // Get original purchased transaction
+      const origTransaction = await Transaction.findById(req.params.id);
 
       // Check user
-      const origTransaction = await Transaction.findById(req.params.id);
       if (origTransaction.user.toString() !== req.user.id) {
         return res.status(401).json({
           msg: 'User not authorized'
         });
       }
 
-      const user = await User.findById(req.user.id).select('-password');
-      const {
-        symbol,
-        qty,
-        date,
-        price
-      } = req.body;
       const transaction = new Transaction({
-        user: user._id,
-        symbol,
-        qty,
-        date,
-        price,
-        type: 'sell',
-        transactionRef: [origTransaction._id]
+        ...newTransaction,
+        transactionRef: [req.params.id]
       });
+
+      await transaction.save();
 
       origTransaction.transactionRef.push(transaction._id);
 
-      const profile = await Profile.findOne({
+      await origTransaction.save();
+
+      let profile = await Profile.findOne({
         user: req.user.id
       });
 
-      await origTransaction.save();
-      await transaction.save();
+      if (!profile) {
+        return res.status(404).json({
+          msg: 'profile not found'
+        });
+      }
+
+      if (profile.stocks[symbol]) {
+        profile = await Profile.findOneAndUpdate({
+          [`stocks.${symbol}.purchaseId`]: ObjectId(req.params.id)
+        }, {
+          $push: {
+            [`stocks.${symbol}.$.sellIds`]: transaction._id
+          }
+        });
+      }
+
       await profile.save();
 
       res.json(transaction);

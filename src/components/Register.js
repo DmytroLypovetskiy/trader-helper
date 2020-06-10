@@ -61,7 +61,7 @@ class Register extends Component {
           </div>
           <div className="d-flex justify-content-between align-items-center">
             <button type="submit" className="btn btn-primary rounded-pill">Register</button>
-            <div>Already have an acccount? Back to <Link to="/">Login</Link></div>
+            <div>Have an acccount? <Link to="/">Login</Link></div>
           </div>
         </form>
       </div>

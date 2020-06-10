@@ -23,32 +23,49 @@ export default class Dashboard extends Component {
 
     //const { data } = (await promise.get(`${finAPI}/quote?symbol=AAPL&token=br8k8g7rh5ral083hgd0`));
 
-    const orderBySymbol = {};
+    const stocksArray = [];
 
-    /* 
-    
-      "BA": [{qty: 10, transactionId: "5edc1454a208"}, {qty: 10, transactionId: "5edc1454a208"}],
-      "GE": [{qty: 10, transactionId: "5edc1454a208"}, {qty: 10, transactionId: "5edc1454a208"}]
-    */
+    for (let symbol in stocks) {
+      stocksArray.push({
+        symbol,
+        transactions: stocks[symbol]
+      })
+    }
 
-    stocks.forEach(stock => {
-      const { symbol, qty, transactionId } = stock;
-
-      if (orderBySymbol.hasOwnProperty(symbol)) {
-        orderBySymbol[symbol].push({ qty, transactionId });
-      } else {
-        orderBySymbol[symbol] = [{ qty, transactionId }]
-      }
-    });
-
-    this.setState({ name, stocks: orderBySymbol, watchlist })
+    this.setState({ name, stocks: stocksArray, watchlist })
   }
-  updateStocks = (symbol, qty) => {
-    /*
-    console.log(this.state.stocks[0]);
+  addTransaction = ({ symbol, transaction }) => {
+    const { stocks } = this.state;
+    const existingStock = stocks.find((stock) => stock.symbol === symbol);
 
-    this.setState({ stocks: [this.state.stocks[0]] })
-    */
+    if (existingStock) {
+      existingStock.transactions.push(transaction);
+    } else {
+      stocks.push({
+        symbol,
+        transactions: [transaction]
+      })
+    }
+
+    this.setState({ stocks })
+
+  }
+  updateTransaction = ({ symbol, transaction: { transactionId, qty } }) => {
+    const { stocks } = this.state;
+    const existingStock = stocks.find((stock) => stock.symbol === symbol);
+
+    if (existingStock) {
+      const origTransaction = existingStock.transactions.find((transaction) => transaction.transactionId === transactionId)
+
+      if (origTransaction.qty >= qty) {
+        origTransaction.qty -= qty;
+
+        if (origTransaction.qty === 0) {
+          existingStock.transactions = existingStock.transactions.filter((transaction) => transaction.transactionId !== transactionId)
+        }
+        this.setState({ stocks })
+      }
+    }
   }
   logout = () => {
     localStorage.removeItem('token');
@@ -60,7 +77,7 @@ export default class Dashboard extends Component {
     return (
       <>
         <div className="d-flex justify-content-between">
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center dashboard-header">
             <h1 className="h4">Dashboard</h1>
             <div className="text-muted mx-2">/ <i className="fas fa-user"></i> Hello <strong>{name}!</strong></div>
           </div>
@@ -70,8 +87,8 @@ export default class Dashboard extends Component {
           <div className="col-lg-9 col-md-6">
             <div className="card p-3 mb-3">
               <h2 className="h5">My Stocks</h2>
-              <BuyForm updateStocks={this.updateStocks} />
-              <StocksInfo stocks={stocks} />
+              <BuyForm addTransaction={this.addTransaction} />
+              <StocksInfo stocks={stocks} updateTransaction={this.updateTransaction} />
             </div>
 
             <div className="card p-3 mb-3">
