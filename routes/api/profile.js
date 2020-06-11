@@ -36,33 +36,6 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// @route   DELETE api/profile/stocks/:stocks_id
-// @desc    Delete stock from profile
-// @access  Private
-router.delete('/stocks/:stocks_id', auth, async (req, res) => {
-  try {
-    const profile = await Profile.findOne({
-      user: req.user.id
-    });
-
-    // Get remove index
-    const removeIndex = profile.stocks
-      .map((item) => item.id)
-      .indexOf(req.params.stocks_id);
-
-    profile.stocks.splice(removeIndex, 1);
-
-    await profile.save();
-
-    res.json(profile);
-  } catch (error) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-});
-
-
-
 // @route   PUT api/profile/watchlist
 // @desc    Add stock to watchlist
 // @access  Private

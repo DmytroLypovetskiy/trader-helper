@@ -5,8 +5,13 @@ const ProfileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user'
   },
-  stocks: {},
   watchlist: [{
+    symbol: {
+      type: String,
+      required: true
+    }
+  }],
+  news: [{
     symbol: {
       type: String,
       required: true

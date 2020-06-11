@@ -11,9 +11,8 @@ const {
 } = require('express-validator');
 const auth = require('../../middleware/auth');
 
-const Profile = require('../../models/Profile');
-const User = require('../../models/User');
 const Transaction = require('../../models/Transaction');
+const Stock = require('../../models/Stock');
 
 // @route   GET api/transactions
 // @desc    Get user transactions
@@ -71,7 +70,7 @@ router.post(
     check('date', 'Date is required')
     .not()
     .isEmpty(),
-    check('price', 'Date is required')
+    check('price', 'Price is required')
     .not()
     .isEmpty()
   ],
@@ -91,67 +90,32 @@ router.post(
       price
     } = req.body;
 
-    const newTransaction = {
-      user: req.user.id,
-      symbol,
-      qty,
-      date,
-      price,
-      type: 'buy'
-    }
-
     try {
-      // Create transaction
-      const transaction = new Transaction(newTransaction);
+      const stockData = {
+        user: req.user.id,
+        symbol,
+        qty,
+        price
+      }
+
+      // Create Transaction record
+      const transaction = new Transaction({
+        ...stockData,
+        date,
+        type: 'buy'
+      });
 
       await transaction.save();
 
-      // Added transaction to user profile to keep track active stock qty
-      let profile = await Profile.findOne({
-        user: req.user.id
+      // Create Stock record
+      const stock = new Stock({
+        ...stockData,
+        transaction: transaction._id,
       });
 
-      if (!profile) {
-        return res.status(404).json({
-          msg: 'profile not found'
-        });
-      }
-
-      const transactionProps = {
-        qty,
-        price,
-        purchaseId: transaction._id,
-        sellIds: []
-      }
-
-      if (!profile.stocks) {
-        profile.stocks = {};
-      }
-
-      if (profile.stocks[symbol]) {
-        profile = await Profile.findOneAndUpdate({
-          user: req.user.id
-        }, {
-          $push: {
-            [`stocks.${symbol}`]: transactionProps
-          }
-        });
-      } else {
-        profile = await Profile.findOneAndUpdate({
-          user: req.user.id
-        }, {
-          $set: {
-            [`stocks.${symbol}`]: [transactionProps]
-          }
-        }, {
-          new: true
-        });
-      }
-
-      await profile.save();
+      await stock.save();
 
       res.json(transaction);
-
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
@@ -172,9 +136,11 @@ router.post(
     check('qty', 'Quantity is required')
     .not()
     .isEmpty(),
+    /*
     check('date', 'Date is required')
     .not()
     .isEmpty(),
+    */
     check('price', 'Price is required')
     .not()
     .isEmpty()
@@ -191,64 +157,59 @@ router.post(
     const {
       symbol,
       qty,
-      date,
+      //date,
       price
     } = req.body;
 
-    const newTransaction = {
-      user: req.user.id,
-      symbol,
-      qty,
-      date,
-      price,
-      type: 'sell'
-    }
-
     try {
-      // Get original purchased transaction
-      const origTransaction = await Transaction.findById(req.params.id);
-
-      // Check user
-      if (origTransaction.user.toString() !== req.user.id) {
-        return res.status(401).json({
-          msg: 'User not authorized'
-        });
+      const stockData = {
+        user: req.user.id,
+        symbol,
+        qty,
+        price
       }
 
-      const transaction = new Transaction({
-        ...newTransaction,
-        transactionRef: [req.params.id]
+      // Update Stock record
+      let stock = await Stock.findOne({
+        transaction: req.params.id
       });
 
-      await transaction.save();
-
-      origTransaction.transactionRef.push(transaction._id);
-
-      await origTransaction.save();
-
-      let profile = await Profile.findOne({
-        user: req.user.id
-      });
-
-      if (!profile) {
-        return res.status(404).json({
-          msg: 'profile not found'
+      if (stock && stock.qty >= qty) {
+        const transaction = new Transaction({
+          ...stockData,
+          date: Date.now(),
+          type: 'sell'
         });
+
+        await transaction.save();
+
+        const newQty = stock.qty - qty;
+
+        if (newQty > 0) {
+          stock = await Stock.findOneAndUpdate({
+            transaction: req.params.id
+          }, {
+            qty: newQty
+          });
+
+          await stock.save();
+
+        } else {
+          stock = await Stock.findOneAndDelete({
+            transaction: req.params.id
+          }, (err) => {
+            if (err) console.error(err);
+          });
+        }
+
+        res.json(transaction);
+      } else {
+        if (!stock) {
+          res.status(500).send('Stock not found');
+        } else {
+          res.status(500).send('Do not have this amount');
+        }
       }
-
-      if (profile.stocks[symbol]) {
-        profile = await Profile.findOneAndUpdate({
-          [`stocks.${symbol}.purchaseId`]: ObjectId(req.params.id)
-        }, {
-          $push: {
-            [`stocks.${symbol}.$.sellIds`]: transaction._id
-          }
-        });
-      }
-
-      await profile.save();
-
-      res.json(transaction);
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');

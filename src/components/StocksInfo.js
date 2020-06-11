@@ -5,6 +5,7 @@ const API = "http://localhost:5000";
 import setAuthToken from '../utils/setAuthToken';
 import Moment from 'react-moment';
 import { SellForm } from './index';
+import TradingViewWidget from 'react-tradingview-widget';
 
 class StockInfo extends Component {
   state = {
@@ -46,13 +47,13 @@ class StockInfo extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map(({ transactionId, qty, price }) => {
-                    return <tr key={transactionId}>
+                  {transactions.map(({ purchaseId, qty, price }) => {
+                    return <tr key={purchaseId}>
                       <td>{qty}</td>
                       <td>{price}</td>
                       <td></td>
                       <td>
-                        <SellForm stock={{ symbol, transactionId, qty }} updateTransaction={this.props.updateTransaction} />
+                        <SellForm stock={{ symbol, purchaseId, qty }} updateTransaction={this.props.updateTransaction} />
                       </td>
                     </tr>
                   })}
@@ -60,7 +61,13 @@ class StockInfo extends Component {
               </table>
             </div>
             <div className="col-lg-7">
-              chart
+
+              <TradingViewWidget
+                symbol="NYSE:BA"
+                interval="D"
+                autosize
+              />
+
             </div>
           </li>
         })}
