@@ -19,7 +19,7 @@ app.use("/api/auth", require("./routes/api/auth")); // User autorization
 app.use("/api/user", require("./routes/api/user")); // User validation
 app.use("/api/profile", require("./routes/api/profile")); // User profile
 app.use("/api/transactions", require("./routes/api/transactions")); // User transactions
-
+app.use("/api/stocks", require("./routes/api/stocks")); // User stocks
 
 app.get("/", (req, res) => {
   /*

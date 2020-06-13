@@ -1,9 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('config');
-const ObjectId = require('mongodb').ObjectID;
 
 const {
   check,
@@ -200,6 +196,8 @@ router.post(
           }, (err) => {
             if (err) console.error(err);
           });
+
+          //res.status(204);
         }
 
         res.json(transaction);
@@ -216,44 +214,6 @@ router.post(
     }
   }
 );
-
-// @route   DELETE api/transactions/:id
-// @desc    Delete transaction
-// @access  Private
-/*
-router.delete('/:id', auth, async (req, res) => {
-  try {
-    const transaction = await Transaction.findById(req.params.id);
-
-    if (!transaction) {
-      return res.status(404).json({
-        msg: 'Transaction not found'
-      });
-    }
-
-    // Check user
-    if (transaction.user.toString() !== req.user.id) {
-      return res.status(401).json({
-        msg: 'User not authorized'
-      });
-    }
-
-    await transaction.remove();
-
-    res.json({
-      msg: 'Transaction removed'
-    });
-  } catch (error) {
-    console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({
-        msg: 'Transaction not found'
-      });
-    }
-    res.status(500).send('Server Error');
-  }
-});
-*/
 
 // @route   DELETE api/profile/watchlist/:stocks_id
 // @desc    Delete stock from watchlist

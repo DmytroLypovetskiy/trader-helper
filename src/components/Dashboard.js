@@ -13,8 +13,13 @@ export default class Dashboard extends Component {
     news: []
   }
   async componentDidMount() {
-    const { data: { stocks, watchlist } } = await axios.get(`${API}/api/profile`);
     const { data: { name } } = await axios.get(`${API}/api/auth`);
+    const { data: { watchlist, news } } = await axios.get(`${API}/api/profile`);
+    const stocksData = (await axios.get(`${API}/api/stocks`)).data;
+
+    const stocks = stocksData.map(({ price, qty, symbol, _id }) => {
+      return { price, qty, symbol, _id }
+    });
 
     //delete axios.defaults.headers.common['x-auth-token'];
     const promise = axios.create({});
@@ -22,33 +27,12 @@ export default class Dashboard extends Component {
     promise.defaults.headers.common.accept = 'application/json';
 
     //const { data } = (await promise.get(`${finAPI}/quote?symbol=AAPL&token=br8k8g7rh5ral083hgd0`));
-
-    const stocksArray = [];
-
-    for (let symbol in stocks) {
-      stocksArray.push({
-        symbol,
-        transactions: stocks[symbol]
-      })
-    }
-
-    this.setState({ name, stocks: stocksArray, watchlist })
+    this.setState({ name, stocks, watchlist, news })
   }
-  addTransaction = ({ symbol, transaction }) => {
+  addTransaction = (stock) => {
     const { stocks } = this.state;
-    const existingStock = stocks.find((stock) => stock.symbol === symbol);
 
-    if (existingStock) {
-      existingStock.transactions.push(transaction);
-    } else {
-      stocks.push({
-        symbol,
-        transactions: [transaction]
-      })
-    }
-
-    this.setState({ stocks })
-
+    this.setState({ stocks: [...stocks, stock] })
   }
   updateTransaction = ({ symbol, transaction: { transactionId, qty } }) => {
     const { stocks } = this.state;
@@ -84,7 +68,7 @@ export default class Dashboard extends Component {
           <div><Link to="/" className="btn btn-outline-primary btn rounded-circle px-2" onClick={this.logout}><i className="fas fa-door-open"></i></Link></div>
         </div>
         <div className="row pt-3">
-          <div className="col-lg-9 col-md-6">
+          <div className="col-md-9">
             <div className="card p-3 mb-3">
               <h2 className="h5">My Stocks</h2>
               <BuyForm addTransaction={this.addTransaction} />
@@ -96,7 +80,7 @@ export default class Dashboard extends Component {
             </div>
 
           </div>
-          <div className="col-lg-3 col-md-6 d-flex">
+          <div className="col-md-3 d-flex">
             <div className="card p-3 flex-grow-1 mb-3">
               <h2 className="h5">News</h2>
             </div>

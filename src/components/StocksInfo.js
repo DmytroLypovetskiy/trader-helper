@@ -15,20 +15,46 @@ class StockInfo extends Component {
     this.setState({ [e.target.name]: e.target.value })
   }
   async componentDidMount() {
-    const { stocks } = this.props;
+    let { stocks } = this.props;
 
+    stocks = this.updateData(stocks);
+    //console.log('mount');
     this.setState({ stocks })
   }
   componentDidUpdate(prev) {
-    const { stocks } = this.props;
+    let { stocks } = this.props;
 
     if (prev.stocks.length !== stocks.length) {
+      //console.log('update');
+      stocks = this.updateData(stocks);
+
       this.setState({ stocks });
     }
+  }
+  updateData = (data) => {
+    const stocks = [];
+    const symbols = {}
+
+    data.forEach(({ _id, symbol, price, qty }) => {
+      if (symbols.hasOwnProperty(symbol)) {
+        symbols[symbol].push({ _id, price, qty });
+      } else {
+        symbols[symbol] = [{ _id, price, qty }]
+      }
+    });
+
+    for (let key in symbols) {
+      stocks.push({
+        symbol: key,
+        transactions: symbols[key]
+      })
+    }
+    return stocks;
   }
   render() {
     /** TODO it call 4 times! **/
     const { stocks } = this.state;
+    //console.log(stocks)
 
     return (
       <ul className="list-unstyled pt-3 stocks-list">
@@ -41,19 +67,21 @@ class StockInfo extends Component {
                 <thead>
                   <tr>
                     <th>Qty</th>
-                    <th>USD(e/a)</th>
+                    <th>$(e/a)</th>
                     <th><span className="text-success">+</span>/<span className="text-danger">-</span></th>
                     <th>Sell: Qty | Price</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map(({ purchaseId, qty, price }) => {
-                    return <tr key={purchaseId}>
+                  {transactions.map(({ _id, qty, price }) => {
+                    return <tr key={_id}>
                       <td>{qty}</td>
                       <td>{price}</td>
                       <td></td>
                       <td>
-                        <SellForm stock={{ symbol, purchaseId, qty }} updateTransaction={this.props.updateTransaction} />
+
+                        <SellForm stock={{ symbol, _id, qty }} updateTransaction={this.props.updateTransaction} />
+
                       </td>
                     </tr>
                   })}
@@ -63,7 +91,7 @@ class StockInfo extends Component {
             <div className="col-lg-7">
 
               <TradingViewWidget
-                symbol="NYSE:BA"
+                symbol={`NYSE:${symbol}`}
                 interval="D"
                 autosize
               />
@@ -71,7 +99,6 @@ class StockInfo extends Component {
             </div>
           </li>
         })}
-
       </ul>
     )
   }

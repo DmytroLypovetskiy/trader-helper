@@ -14,14 +14,18 @@ class BuyForm extends Component {
 
     try {
       const { symbol, qty, date, price } = this.state;
-      const transaction = await axios.post(`${API}/api/transactions/buy`, { symbol, qty: Number(qty), date, price: Number(price) });
+      /* TODO: Fix hardcoded date */
+      const transaction = (await axios.post(`${API}/api/transactions/buy`, { symbol, qty: Number(qty), date: Date.now(), price: Number(price) })).data;
 
       if (transaction) {
         const { addTransaction } = this.props;
-        const transactionData = {
+
+        addTransaction({
+          _id: transaction._id,
           symbol,
-          transaction: { qty, price, transactionId: transaction.data._id }
-        }
+          qty,
+          price
+        });
 
         this.setState({
           symbol: '',
@@ -30,7 +34,6 @@ class BuyForm extends Component {
           price: ''
         });
 
-        addTransaction(transactionData);
       }
     } catch (err) {
       console.error(err)
@@ -41,7 +44,6 @@ class BuyForm extends Component {
   }
   render() {
     const { symbol, qty, date, price } = this.state;
-    //console.log(this.state);
 
     return (
       <form onSubmit={this.buyStock}>
