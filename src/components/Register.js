@@ -28,6 +28,7 @@ class Register extends Component {
   }
   render() {
     const { name, email, password, isAuthenticated } = this.state;
+
     // Redirect if logged in
 
     if (isAuthenticated) {

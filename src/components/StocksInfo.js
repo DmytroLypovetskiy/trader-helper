@@ -18,14 +18,12 @@ class StockInfo extends Component {
     let { stocks } = this.props;
 
     stocks = this.updateData(stocks);
-    //console.log('mount');
     this.setState({ stocks })
   }
   componentDidUpdate(prev) {
     let { stocks } = this.props;
 
     if (prev.stocks.length !== stocks.length) {
-      //console.log('update');
       stocks = this.updateData(stocks);
 
       this.setState({ stocks });
@@ -33,13 +31,13 @@ class StockInfo extends Component {
   }
   updateData = (data) => {
     const stocks = [];
-    const symbols = {}
+    const symbols = {};
 
-    data.forEach(({ _id, symbol, price, qty }) => {
+    data.forEach(({ _id, symbol, price, qty, transaction }) => {
       if (symbols.hasOwnProperty(symbol)) {
-        symbols[symbol].push({ _id, price, qty });
+        symbols[symbol].push({ _id, price, qty, transaction });
       } else {
-        symbols[symbol] = [{ _id, price, qty }]
+        symbols[symbol] = [{ _id, price, qty, transaction }]
       }
     });
 
@@ -73,15 +71,13 @@ class StockInfo extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map(({ _id, qty, price }) => {
+                  {transactions.map(({ _id, qty, price, transaction }) => {
                     return <tr key={_id}>
                       <td>{qty}</td>
                       <td>{price}</td>
                       <td></td>
                       <td>
-
-                        <SellForm stock={{ symbol, _id, qty }} updateTransaction={this.props.updateTransaction} />
-
+                        <SellForm stock={{ symbol, _id, qty, transaction }} updateTransaction={this.props.updateTransaction} />
                       </td>
                     </tr>
                   })}

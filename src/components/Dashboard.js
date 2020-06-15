@@ -17,8 +17,8 @@ export default class Dashboard extends Component {
     const { data: { watchlist, news } } = await axios.get(`${API}/api/profile`);
     const stocksData = (await axios.get(`${API}/api/stocks`)).data;
 
-    const stocks = stocksData.map(({ price, qty, symbol, _id }) => {
-      return { price, qty, symbol, _id }
+    const stocks = stocksData.map(({ price, qty, symbol, _id, transaction }) => {
+      return { price, qty, symbol, _id, transaction }
     });
 
     //delete axios.defaults.headers.common['x-auth-token'];
@@ -32,24 +32,24 @@ export default class Dashboard extends Component {
   addTransaction = (stock) => {
     const { stocks } = this.state;
 
-    this.setState({ stocks: [...stocks, stock] })
+    this.setState({ stocks: [stock, ...stocks] })
   }
-  updateTransaction = ({ symbol, transaction: { transactionId, qty } }) => {
+  updateTransaction = ({ transaction, qty }) => {
     const { stocks } = this.state;
-    const existingStock = stocks.find((stock) => stock.symbol === symbol);
 
-    if (existingStock) {
-      const origTransaction = existingStock.transactions.find((transaction) => transaction.transactionId === transactionId)
-
-      if (origTransaction.qty >= qty) {
-        origTransaction.qty -= qty;
-
-        if (origTransaction.qty === 0) {
-          existingStock.transactions = existingStock.transactions.filter((transaction) => transaction.transactionId !== transactionId)
+    const updStocks = stocks
+      .map(stock => {
+        if (stock.transaction === transaction) {
+          stock.qty -= qty;
         }
-        this.setState({ stocks })
-      }
-    }
+        return stock;
+      })
+      .filter(stock => stock.qty !== 0);
+    console.log(stocks);
+    console.log(updStocks);
+
+
+    this.setState({ stocks: updStocks })
   }
   logout = () => {
     localStorage.removeItem('token');

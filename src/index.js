@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 
 import './styles.scss';
-import { Login, Register, Dashboard } from './components';
+import { Login, Register, Dashboard, PrivateRoute } from './components';
 import setAuthToken from './utils/setAuthToken';
 
 if (localStorage.token) {
@@ -18,7 +18,7 @@ class App extends Component {
           <Switch>
             <Route exact path='/' component={Login} />
             <Route exact path='/register' component={Register} />
-            <Route path='/dashboard' component={Dashboard} />
+            <PrivateRoute exact path='/dashboard' component={Dashboard} />
           </Switch>
         </section>
       </HashRouter >

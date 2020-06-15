@@ -4,6 +4,7 @@ import Dashboard from './Dashboard';
 import BuyForm from './BuyForm';
 import SellForm from './SellForm';
 import StocksInfo from './StocksInfo';
+import PrivateRoute from './PrivateRoute';
 
 export {
   Login,
@@ -11,5 +12,6 @@ export {
   BuyForm,
   SellForm,
   StocksInfo,
-  Register
+  Register,
+  PrivateRoute
 };
